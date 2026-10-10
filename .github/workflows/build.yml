@@ -27,6 +27,13 @@ jobs:
         run: npm install --legacy-peer-deps
       - name: Build
         run: npm run build
+      - name: Bundle the modman merger
+        # The merger ships inside the extension so users don't need PSM
+        # installed. Keep this tag in sync with the tested modman release.
+        run: |
+          mkdir -p dist/modman
+          curl -fL --retry 3 -o dist/modman/modman.exe \
+            https://github.com/emberglazee/project-modman/releases/download/v0.3.0/modman-win-amd64.exe
       - name: Upload extension
         uses: actions/upload-artifact@v7
         with:

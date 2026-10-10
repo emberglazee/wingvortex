@@ -9,7 +9,7 @@ import { NativeSlotReader } from "../slots/pakReader";
 import { getGamePath } from "vortex-ext-common";
 import { toEventPromise } from "../util";
 
-export const sicarioPreDeploymentHandler = (api: IExtensionApi): (profileId: string, deployment: { [modType: string]: IDeployedFile[] }) => Promise<void> => {
+export const modmanPreDeploymentHandler = (api: IExtensionApi): (profileId: string, deployment: { [modType: string]: IDeployedFile[] }) => Promise<void> => {
     const state = api.getState();
     const { store } = api;
     return async (profileId, oldDeployment) => {
@@ -17,11 +17,11 @@ export const sicarioPreDeploymentHandler = (api: IExtensionApi): (profileId: str
     }
 }
 
-export const runSicarioMerge = async (api: IExtensionApi, profileId: string, oldDeployment: { [modType: string]: IDeployedFile[] }, setTitle?: (title: string) => void): Promise<void> => {
+export const runModmanMerge = async (api: IExtensionApi, profileId: string, oldDeployment: { [modType: string]: IDeployedFile[] }, setTitle?: (title: string) => void): Promise<void> => {
     var state = api.getState();
     const {store} = api;
     if (Features.isSicarioEnabled(state)) {
-        setTitle?.("Updating PSM mod state");
+        setTitle?.("Updating merge data mod state");
         let profile = state.persistent.profiles[profileId];
         try {
             //kick this off now to give Vortex a chance to find the tools hopefully
@@ -52,7 +52,7 @@ export const runSicarioMerge = async (api: IExtensionApi, profileId: string, old
         //   callback but _not_ for everything else that is triggered separately
         //const didNeedDeployment = state.persistent.deployment.needToDeploy[profile.gameId];
         try {
-            setTitle?.("Building PSM merged mod");
+            setTitle?.("Building merged mod (modman)");
             await runMerger(api, profile);
             setTitle?.("Updating merged mod state");
             await updateMergedAttribute(api, profile, modId);
@@ -64,16 +64,16 @@ export const runSicarioMerge = async (api: IExtensionApi, profileId: string, old
                 //ignored
             }
             else if (err instanceof util.SetupError) {
-                api.showErrorNotification('Failed to find PSM', 'Please install PSM and configure it as a tool in Vortex, or ensure that PSM is in the root of the game directory.', {allowReport: false});
+                api.showErrorNotification('Failed to find modman', 'The bundled modman.exe is missing — try reinstalling this extension, or place a modman.exe in the root of the game directory.', {allowReport: false});
             } else {
-                var errDetail = 'There was an unknown error running PSM to merge your mods!';
+                var errDetail = 'There was an unknown error running modman to merge your mods!';
                 if (err.exitCode) {
                     switch (err.exitCode) {
                         case 412:
                             errDetail = "One of the presets or mods in your mods list is attempting to patch a non-existent file. Check your presets and mods for updates and try again.";
                             break;
                         case 422:
-                            errDetail = "One of the presets or mods in your mods list attempted to make an invalid change in a patch. This is a problem in the patch file itself, and PSM cannot correct for it."
+                            errDetail = "One of the presets or mods in your mods list attempted to make an invalid change in a patch. This is a problem in the patch file itself, and modman cannot correct for it."
                         default:
                             break;
                     }
@@ -87,8 +87,8 @@ export const runSicarioMerge = async (api: IExtensionApi, profileId: string, old
 }
 
 
-export const sicarioDeploymentHandler = (api: IExtensionApi): (profileId: string, deployment: { [modType: string]: IDeployedFile[] }, setTitle?: (title: string) => void) => Promise<void> => {
-    return async (profile, deployment) => await runSicarioMerge(api, profile, deployment);
+export const modmanDeploymentHandler = (api: IExtensionApi): (profileId: string, deployment: { [modType: string]: IDeployedFile[] }, setTitle?: (title: string) => void) => Promise<void> => {
+    return async (profile, deployment) => await runModmanMerge(api, profile, deployment);
 }
 
 const updateMergedAttribute = async (api: IExtensionApi, profile: IProfile, modId: string): Promise<void> => {

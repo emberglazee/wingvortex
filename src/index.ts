@@ -13,7 +13,7 @@ import { getInstaller } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 import { update010, migrate010, update020, getUpdateInfo, notesMigration } from "./migrations";
-import {getMergePath, isSicarioMerge, SicarioSettings, toggleIntegration, sicarioIntegrationTest, PSMTool, runSicarioMerge} from "./sicario";
+import {getMergePath, isSicarioMerge, ModmanSettings, toggleIntegration, modmanIntegrationTest, runModmanMerge} from "./modman";
 
 import {getGamePath, isActiveGame} from "vortex-ext-common";
 import { EventHandler } from "vortex-ext-common/events";
@@ -63,13 +63,13 @@ function main(context: IExtensionContext) {
     }
     
     context.registerSettings('Interface', GeneralSettings, undefined, isWingmanManaged, 101);
-    context.registerSettings('Interface', SicarioSettings, undefined, isWingmanManaged, 102);
+    context.registerSettings('Interface', ModmanSettings, undefined, isWingmanManaged, 102);
     context.registerToDo(
         'sicario-integration',
         'settings',
         getIntegrationProps,
         'sicario-alt',
-        'Project Sicario Integration',
+        'Automatic mod merging (modman)',
         (props: IIntegrationProps) => toggleIntegration(context.api),
         (props: IIntegrationProps) => isWingmanManaged() && props.gameMode == GAME_ID,
         (t, props: IIntegrationProps) => (props.enabled ? t('Yes') : t('No')),
@@ -93,7 +93,7 @@ function main(context: IExtensionContext) {
         util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
         
         evt.didDeploy(async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
-        evt.didDeploy(async (profileId, deployment, setTitle) => runSicarioMerge(context.api, profileId, deployment, setTitle), {name: 'Project Sicario Integration'});
+        evt.didDeploy(async (profileId, deployment, setTitle) => runModmanMerge(context.api, profileId, deployment, setTitle), {name: 'modman merge'});
         context.api.onStateChange(
             ['persistent', 'mods', GAME_ID],
             evt.onGameModsChanged(async (current, changes) => {
@@ -107,7 +107,7 @@ function main(context: IExtensionContext) {
         name: "Project Wingman",
         mergeMods: lo.createPrefix,
         logo: 'gameart.png',
-        supportedTools: [PSMTool],
+        supportedTools: [],
         executable: () => 'ProjectWingman.exe',
         requiredFiles: [
             'ProjectWingman.exe'
@@ -152,7 +152,7 @@ function main(context: IExtensionContext) {
         },
         onStart: 'hide'
     });
-    //special mod type for Sicario merged patches, mostly so that the path can be tweaked and it won't show in the LO
+    //special mod type for merged patches, mostly so that the path can be tweaked and it won't show in the LO
     context.registerModType(
         'sicario-merge',
         10,
@@ -164,7 +164,7 @@ function main(context: IExtensionContext) {
             mergeMods: true,
             deploymentEssential: false
         });
-    //this adds a new mod type just so that tools (like Sicario) go into the root directory instead
+    //this adds a new mod type just so that tools (like the merger) go into the root directory instead
     context.registerModType(
         'sicario-tools',
         10,
@@ -180,7 +180,7 @@ function main(context: IExtensionContext) {
             deploymentEssential: false
         }
     );
-    context.registerTest('sicario-integration', 'gamemode-activated', () => sicarioIntegrationTest(context.api)());
+    context.registerTest('sicario-integration', 'gamemode-activated', () => modmanIntegrationTest(context.api)());
     context.registerInstaller(
         'pw-pakmods-advanced',
         25,

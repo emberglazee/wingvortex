@@ -33,6 +33,17 @@ This continuation modernizes the extension for the current game and tooling:
 Install the extension from the CI builds on GitHub (or Vortex's Extensions pane
 once published), restart Vortex, and use the Manage button on Project Wingman.
 
+### Automatic merging (modman)
+
+Enable *Automatic mod merging* in Vortex's Interface settings (Settings → Interface).
+When you deploy your mods, Vortex then runs [modman](https://github.com/emberglazee/project-modman)
+to rebuild your merged mod from every enabled mod and preset, and deploys it as a
+managed mod — no manual PSM runs, no separate merger install. The merger binary
+ships inside the extension.
+
+The merge-data mod keeps the historic name *PSM Merge Data* so existing setups
+carry over unchanged.
+
 Please report any bugs or issues you find.
 
 ## Building
