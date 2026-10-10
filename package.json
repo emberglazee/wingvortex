@@ -1,8 +1,16 @@
 {
   "name": "game-projectwingman",
-  "version": "0.2.5",
-  "description": "Adds support for Project Wingman mods in Vortex",
+  "version": "0.3.0",
+  "description": "Adds support for Project Wingman mods in Vortex (community continuation of WingVortex)",
   "main": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emberglazee/wingvortex.git"
+  },
+  "contributors": [
+    "agc93 (original author)",
+    "emberglazee (community continuation)"
+  ],
   "scripts": {
     "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --display-error-details --progress --profile --color",
     "build": "npm run webpack && extractInfo && copyfiles -f ./src/**/*.svg ./src/**/*.bms ./*.png ./dist/",
