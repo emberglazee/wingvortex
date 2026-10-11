@@ -33,7 +33,7 @@ jobs:
         run: |
           mkdir -p dist/modman
           curl -fL --retry 3 -o dist/modman/modman.exe \
-            https://github.com/emberglazee/project-modman/releases/download/v0.4.2/modman-win-amd64.exe
+            https://github.com/emberglazee/project-modman/releases/download/v0.4.4/modman-win-amd64.exe
       - name: Upload extension
         uses: actions/upload-artifact@v7
         with:
